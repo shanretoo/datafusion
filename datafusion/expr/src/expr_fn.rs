@@ -28,9 +28,9 @@ use crate::{
     AggregateUDF, Expr, LogicalPlan, Operator, ScalarFunctionImplementation, ScalarUDF,
     Signature, Volatility,
 };
-use crate::{AggregateUDFImpl, BuiltInWindowFunction, ColumnarValue, ScalarUDFImpl, WindowUDF, WindowUDFImpl};
+use crate::{AggregateUDFImpl, BuiltInWindowFunction, ColumnarValue, Literal, ScalarUDFImpl, WindowUDF, WindowUDFImpl};
 use arrow::datatypes::{DataType, Field};
-use datafusion_common::{Column, Result};
+use datafusion_common::{Column, Result, ScalarValue};
 use std::any::Any;
 use std::fmt::Debug;
 use std::ops::Not;
@@ -245,8 +245,8 @@ pub fn percent_rank() -> expr::WindowFunction {
 /// Create an expression to represent the `cume_dist` window function
 ///
 /// Note: call [`expr::WindowFunction::build]` to create an [`Expr`]
-pub fn cume_dist(arg: Expr) -> expr::WindowFunction {
-    expr::WindowFunction::new(BuiltInWindowFunction::CumeDist, vec![arg])
+pub fn cume_dist() -> expr::WindowFunction {
+    expr::WindowFunction::new(BuiltInWindowFunction::CumeDist, vec![])
 }
 
 /// Create an expression to represent the `ntile` window function
@@ -259,15 +259,37 @@ pub fn ntile(arg: Expr) -> expr::WindowFunction {
 /// Create an expression to represent the `lag` window function
 ///
 /// Note: call [`expr::WindowFunction::build]` to create an [`Expr`]
-pub fn lag(arg: Expr) -> expr::WindowFunction {
-    expr::WindowFunction::new(BuiltInWindowFunction::Lag, vec![arg])
+pub fn lag(
+    arg: Expr,
+    shift_offset: Option<i64>,
+    default_value: Option<ScalarValue>,
+) -> expr::WindowFunction {
+    let shift_offset_lit = shift_offset
+        .map(|v| v.lit())
+        .unwrap_or(ScalarValue::Null.lit());
+    let default_lit = default_value.unwrap_or(ScalarValue::Null).lit();
+    expr::WindowFunction::new(
+        BuiltInWindowFunction::Lag,
+        vec![arg, shift_offset_lit, default_lit],
+    )
 }
 
 /// Create an expression to represent the `lead` window function
 ///
 /// Note: call [`expr::WindowFunction::build]` to create an [`Expr`]
-pub fn lead(arg: Expr) -> expr::WindowFunction {
-    expr::WindowFunction::new(BuiltInWindowFunction::Lead, vec![arg])
+pub fn lead(
+    arg: Expr,
+    shift_offset: Option<i64>,
+    default_value: Option<ScalarValue>,
+) -> expr::WindowFunction {
+    let shift_offset_lit = shift_offset
+        .map(|v| v.lit())
+        .unwrap_or(ScalarValue::Null.lit());
+    let default_lit = default_value.unwrap_or(ScalarValue::Null).lit();
+    expr::WindowFunction::new(
+        BuiltInWindowFunction::Lead,
+        vec![arg, shift_offset_lit, default_lit],
+    )
 }
 
 /// Create an expression to represent the `first_value` window function
@@ -287,8 +309,8 @@ pub fn last_value(arg: Expr) -> expr::WindowFunction {
 /// Create an expression to represent the `nth_value` window function
 ///
 /// Note: call [`expr::WindowFunction::build]` to create an [`Expr`]
-pub fn nth_value(arg: Expr) -> expr::WindowFunction {
-    expr::WindowFunction::new(BuiltInWindowFunction::NthValue, vec![arg])
+pub fn nth_value(arg: Expr, n: u32) -> expr::WindowFunction {
+    expr::WindowFunction::new(BuiltInWindowFunction::NthValue, vec![arg, n.lit()])
 }
 
 /// Return a new expression with bitwise AND

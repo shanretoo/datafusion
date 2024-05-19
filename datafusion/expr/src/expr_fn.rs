@@ -18,7 +18,8 @@
 //! Functions for creating logical expressions
 
 use crate::expr::{
-    self, AggregateFunction, BinaryExpr, Cast, Exists, GroupingSet, InList, InSubquery, Placeholder, TryCast
+    self, AggregateFunction, BinaryExpr, Cast, Exists, GroupingSet, InList, InSubquery,
+    Placeholder, TryCast,
 };
 use crate::function::{
     AccumulatorArgs, AccumulatorFactoryFunction, PartitionEvaluatorFactory,
@@ -28,7 +29,10 @@ use crate::{
     AggregateUDF, Expr, LogicalPlan, Operator, ScalarFunctionImplementation, ScalarUDF,
     Signature, Volatility,
 };
-use crate::{AggregateUDFImpl, BuiltInWindowFunction, ColumnarValue, Literal, ScalarUDFImpl, WindowUDF, WindowUDFImpl};
+use crate::{
+    AggregateUDFImpl, BuiltInWindowFunction, ColumnarValue, Literal, ScalarUDFImpl,
+    WindowUDF, WindowUDFImpl,
+};
 use arrow::datatypes::{DataType, Field};
 use datafusion_common::{Column, Result, ScalarValue};
 use std::any::Any;
@@ -309,7 +313,7 @@ pub fn last_value(arg: Expr) -> expr::WindowFunction {
 /// Create an expression to represent the `nth_value` window function
 ///
 /// Note: call [`expr::WindowFunction::build]` to create an [`Expr`]
-pub fn nth_value(arg: Expr, n: u32) -> expr::WindowFunction {
+pub fn nth_value(arg: Expr, n: i64) -> expr::WindowFunction {
     expr::WindowFunction::new(BuiltInWindowFunction::NthValue, vec![arg, n.lit()])
 }
 
